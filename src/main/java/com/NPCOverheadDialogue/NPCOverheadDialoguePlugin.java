@@ -19,10 +19,11 @@ import net.runelite.client.util.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @PluginDescriptor(
-        name = "Example"
+        name = "NPC Overhead Dialog"
 )
 public class NPCOverheadDialoguePlugin extends Plugin {
     @Inject
@@ -77,25 +78,65 @@ public class NPCOverheadDialoguePlugin extends Plugin {
     }
      */
 
+    //for ambient text or hitsplat text
     public void ambientNPCText(Actor actor, String npcName, String dialogue) {
-        if (actor != null && actor.getName().equals(npcName)) {
+        if (actor != null && Objects.equals(actor.getName(), npcName)) {
             actor.setOverheadText(dialogue);
             log.info(dialogue);
-            new java.util.Timer().schedule(
-                    new java.util.TimerTask() {
-                        @Override
-                        public void run() {
-                            // your code here
-                            actor.setOverheadText("");
-                        }
-                    },
-                    1800
-            );
         }
     }
 
+    public void npcWalkingTextInvoker(){
+        //For when NPCs are moving
+        List<NPC> localNPCs = client.getNpcs();
+        for (NPC localNPC : localNPCs)
+        {
+            npcWalkingText(localNPC, "Reldo", "I am a librarian");
+            npcWalkingText(localNPC, "Cleaner", "*Sweep* *Sweep*");
+        }
+    }
+
+    //for walking text
+    public void npcWalkingText(NPC npc, String npcName, String dialogue){
+        if (npc != null && Objects.equals(npc.getName(), npcName)) {
+            WorldPoint npcPos = npc.getWorldLocation();
+            boolean npcExists = false;
+            int npcIndex = 0;
+            int currentTick = client.getTickCount();
+            if (NPCList.size() > 0) {
+                for (NPCWithTicks n : NPCList) {
+                    if (n.getNPCName().equals(npc.getName())) {
+                        npcExists = true;
+                        break;
+                    }
+                    npcIndex++;
+                }
+            }
+
+            if (!npcExists) {
+                NPCList.add(new NPCWithTicks(npc.getName(), currentTick, npcPos.getX(), npcPos.getY(), false));
+            }
+
+            if (npcPos.getX() != NPCList.get(npcIndex).getLastXCoordinate() || npcPos.getY() != NPCList.get(npcIndex).getLastYCoordinate() && NPCList.get(npcIndex).getNPCTicksWithoutMoving() >= 2/*!NPCList.get(npcIndex).getMovedLastGameTick()*/) {
+                log.info("Game tick: " + currentTick + " : " + npc.getName() + " moved: " + npcPos.getX() + " " + npcPos.getY());
+                //NPCList.get(npcIndex).setMovedLastGameTick(true);
+                NPCList.get(npcIndex).setNPCTicksWithoutMoving(0);
+                npcOverheadText(npc, dialogue);
+                //NPCList.get(npcIndex).setNPCStartingTick(client.getTickCount());
+            } else {
+                log.info("Game tick: " + currentTick + " : " + npc.getName() + " has stopped moving");
+                //NPCList.get(npcIndex).setMovedLastGameTick(false);
+                NPCList.get(npcIndex).incrementNPCTicksWithoutMoving();
+            }
+            NPCList.get(npcIndex).setLastXCoordinate(npcPos.getX());
+            NPCList.get(npcIndex).setLastYCoordinate(npcPos.getY());
+        }
+    }
+
+    //sets the overhead text
     public void npcOverheadText(Actor a, String dialogue) {
-        a.setOverheadText(dialogue);
+        int startingTick = client.getTickCount();
+        /*a.setOverheadText(dialogue);
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
                     @Override
@@ -105,7 +146,12 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                     }
                 },
                 3000
-        );
+        );*/
+        while(client.getTickCount() >= startingTick + 5){
+            a.setOverheadText(dialogue);
+        }
+        a.setOverheadText("");
+
     }
 
     @Subscribe
@@ -117,11 +163,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         }
     }
 
-
-    @Subscribe
-    public void onGameTick(GameTick event) {
-
-    	//For when an NPC has dialogue
+    public void npcDialog(){
         if (client.getWidget(WidgetInfo.DIALOG_NPC_TEXT) != null && !lastNPCText.equals(Text.sanitizeMultilineText((client.getWidget(WidgetInfo.DIALOG_NPC_TEXT)).getText()))) {
             Widget npcDialog = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
             if (npcDialog != null) {
@@ -131,55 +173,21 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                 npcOverheadText(actor, npcText);
             }
         }
-		//For when your player has dialogue
+        //For when your player has dialogue
         if (client.getWidget(WidgetID.DIALOG_PLAYER_GROUP_ID, 4) != null && !lastPlayerText.equals(Text.sanitizeMultilineText((client.getWidget(WidgetID.DIALOG_PLAYER_GROUP_ID, 4)).getText()))) {
             Widget playerDialog = client.getWidget(WidgetID.DIALOG_PLAYER_GROUP_ID, 4);
             if (playerDialog != null) {
                 String playerText = Text.sanitizeMultilineText(playerDialog.getText());
                 lastPlayerText = playerText;
                 log.info(playerText);
-                npcOverheadText(client.getLocalPlayer(), playerText);
+                npcOverheadText(Objects.requireNonNull(client.getLocalPlayer()), playerText);
             }
         }
+    }
 
-        //For when NPCs are moving
-        List<NPC> localNPCs = client.getNpcs();
-        for (NPC localNPC : localNPCs)
-        {
-            if ("Reldo".equals(localNPC.getName()))
-            {
-                WorldPoint npcPos = localNPC.getWorldLocation();
-                boolean npcExists = false;
-                int npcIndex = 0;
-                int currentTick = client.getTickCount();
-                if(NPCList.size() > 0){
-                    for(NPCWithTicks n : NPCList){
-                        if(n.getNPCName().equals(localNPC.getName())){
-                            npcExists = true;
-                            break;
-                        }
-                        npcIndex++;
-                    }
-                }
-
-                if(npcExists == false){
-                    NPCList.add(new NPCWithTicks(localNPC.getName(), currentTick, npcPos.getX(), npcPos.getY(), false));
-                }
-
-                if (npcPos.getX() != NPCList.get(npcIndex).getLastXCoordinate() || npcPos.getY() != NPCList.get(npcIndex).getLastYCoordinate() && NPCList.get(npcIndex).getMovedLastGameTick() == false)
-                {
-                    log.info("Game tick: " + currentTick + " : Reldo moved: " + npcPos.getX() + " " + npcPos.getY());
-                    NPCList.get(npcIndex).setMovedLastGameTick(true);
-                    npcOverheadText(localNPC, "Look at me move!");
-                    NPCList.get(npcIndex).setNPCStartingTick(client.getTickCount());
-                }
-                else{
-                    log.info("Game tick: " + currentTick + " : Reldo has stopped moving");
-                    NPCList.get(npcIndex).setMovedLastGameTick(false);
-                }
-                NPCList.get(npcIndex).setLastXCoordinate(npcPos.getX());
-                NPCList.get(npcIndex).setLastYCoordinate(npcPos.getY());
-            }
-        }
+    @Subscribe
+    public void onGameTick(GameTick event) {
+    	npcDialog();
+    	npcWalkingTextInvoker();
     }
 }

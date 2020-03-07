@@ -3,7 +3,7 @@ package com.NPCOverheadDialogue;
 public class NPCWithTicks {
     private String NPCName;
     private int npcStartingTick;
-    //private  int npcLastMovingTick;
+    private  int npcTicksWithoutMoving;
     private int lastXCoordinate;
     private int lastYCoordinate;
     private boolean movedLastGameTick;
@@ -18,7 +18,7 @@ public class NPCWithTicks {
 
     public int getNPCStartingTick(){return npcStartingTick;}
 
-    //public int getNPCLastMovingTick(){return npcLastMovingTick;}
+    public int getNPCTicksWithoutMoving(){return npcTicksWithoutMoving;}
 
     public int getLastXCoordinate(){return lastXCoordinate;}
 
@@ -30,11 +30,13 @@ public class NPCWithTicks {
 
     public void setNPCStartingTick(int startingTick){npcStartingTick = startingTick;}
 
-    //public void setNPCLastMovingTick(int lastMovingTick){npcLastMovingTick = lastMovingTick;}
+    public void setNPCTicksWithoutMoving(int ticksWithoutMoving){npcTicksWithoutMoving = ticksWithoutMoving;}
 
     public void setLastXCoordinate(int x){lastXCoordinate = x;}
 
     public void setLastYCoordinate(int y){lastYCoordinate = y;}
 
     public void setMovedLastGameTick(boolean moving){movedLastGameTick = moving;}
+
+    public void incrementNPCTicksWithoutMoving(){npcTicksWithoutMoving++;}
 }

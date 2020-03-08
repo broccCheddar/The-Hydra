@@ -36,6 +36,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
     private String lastNPCText = "";
     private String lastPlayerText = "";
     private ArrayList<NPCWithTicks> NPCList = new ArrayList<>();
+    private int trackingTick = 0;
 
 
     @Override
@@ -61,13 +62,6 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         return configManager.getConfig(NPCOverheadDialogueConfig.class);
     }
 
-    @Subscribe
-    public void onHitsplatApplied(HitsplatApplied event) {
-        System.out.println(event.getActor().getName());
-        ambientNPCText(event.getActor(), "Rat", "hiss");
-        ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat");
-    }
-
     /*
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged) {
@@ -78,46 +72,76 @@ public class NPCOverheadDialoguePlugin extends Plugin {
     }
      */
 
+    @Subscribe
+    public void onHitsplatApplied(HitsplatApplied event) {
+        //System.out.println(event.getActor().getName());
+        ambientNPCText(event.getActor(), "Rat", "hiss", true);
+        ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat", true);
+    }
+
     //for ambient text or hitsplat text
-    public void ambientNPCText(Actor actor, String npcName, String dialogue) {
-        if (actor != null && Objects.equals(actor.getName(), npcName)) {
-            actor.setOverheadText(dialogue);
+    public void ambientNPCText(Actor actor, String npcName, String dialogue, boolean hitsplat) {
+        if (actor != null && Objects.equals(actor.getName(), npcName) && hitsplat) {
+            npcOverheadText(actor, dialogue);
             log.info(dialogue);
+        }
+        else if(actor != null && Objects.equals(actor.getName(), npcName) && !hitsplat){
+            int npcIndex = npcExistence((NPC)actor);
+
+            if(NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 10 && (int)(Math.random() * ((10 - 1) + 1)) > 5){
+                npcOverheadText(actor, dialogue);
+                NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
+                log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
+            }
+            else{
+                NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
+                log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
+            }
         }
     }
 
-    public void npcWalkingTextInvoker(){
+    //runs every game tick
+    //checks all local NPCs for movement overhead text and applies if necessary
+    public void npcTextInvoker(){
         //For when NPCs are moving
         List<NPC> localNPCs = client.getNpcs();
         for (NPC localNPC : localNPCs)
         {
+            ambientNPCText(localNPC, "Rod Fishing spot", "*blub* *blub*", false);
             npcWalkingText(localNPC, "Reldo", "I am a librarian");
             npcWalkingText(localNPC, "Cleaner", "*Sweep* *Sweep*");
         }
+    }
+
+    //checks if the NPC exists in NPCList, then adds it if it doesn't
+    public int npcExistence(NPC npc){
+        boolean npcExists = false;
+        int npcIndex = 0;
+
+        if (NPCList.size() > 0) {
+            for (NPCWithTicks n : NPCList) {
+                if (n.getNPCID() == npc.getId()) {
+                    npcExists = true;
+                    break;
+                }
+                npcIndex++;
+            }
+        }
+
+        if (!npcExists) {
+            NPCList.add(new NPCWithTicks(npc.getName(), npc.getId(), client.getTickCount(), npc.getWorldLocation().getX(), npc.getWorldLocation().getY()));
+        }
+        return npcIndex;
     }
 
     //for walking text
     public void npcWalkingText(NPC npc, String npcName, String dialogue){
         if (npc != null && Objects.equals(npc.getName(), npcName)) {
             WorldPoint npcPos = npc.getWorldLocation();
-            boolean npcExists = false;
-            int npcIndex = 0;
-            int currentTick = client.getTickCount();
-            if (NPCList.size() > 0) {
-                for (NPCWithTicks n : NPCList) {
-                    if (n.getNPCName().equals(npc.getName())) {
-                        npcExists = true;
-                        break;
-                    }
-                    npcIndex++;
-                }
-            }
+            int currentTick = client.getTickCount(); //for debugging
+            int npcIndex = npcExistence(npc);
 
-            if (!npcExists) {
-                NPCList.add(new NPCWithTicks(npc.getName(), currentTick, npcPos.getX(), npcPos.getY(), false));
-            }
-
-            if (npcPos.getX() != NPCList.get(npcIndex).getLastXCoordinate() || npcPos.getY() != NPCList.get(npcIndex).getLastYCoordinate() && NPCList.get(npcIndex).getNPCTicksWithoutMoving() >= 2/*!NPCList.get(npcIndex).getMovedLastGameTick()*/) {
+            if (npcPos.getX() != NPCList.get(npcIndex).getLastXCoordinate() || npcPos.getY() != NPCList.get(npcIndex).getLastYCoordinate() && NPCList.get(npcIndex).getNPCTicksWithoutMoving() >= 2) {
                 log.info("Game tick: " + currentTick + " : " + npc.getName() + " moved: " + npcPos.getX() + " " + npcPos.getY());
                 //NPCList.get(npcIndex).setMovedLastGameTick(true);
                 NPCList.get(npcIndex).setNPCTicksWithoutMoving(0);
@@ -133,27 +157,6 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         }
     }
 
-    //sets the overhead text
-    public void npcOverheadText(Actor a, String dialogue) {
-        int startingTick = client.getTickCount();
-        /*a.setOverheadText(dialogue);
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        // your code here
-                        a.setOverheadText("");
-                    }
-                },
-                3000
-        );*/
-        while(client.getTickCount() >= startingTick + 5){
-            a.setOverheadText(dialogue);
-        }
-        a.setOverheadText("");
-
-    }
-
     @Subscribe
     public void onInteractingChanged(InteractingChanged event) {
         if (event.getTarget() != null && event.getSource() == client.getLocalPlayer()) {
@@ -163,6 +166,8 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         }
     }
 
+    //runs every game tick
+    //checks if there is NPC or player dialog
     public void npcDialog(){
         if (client.getWidget(WidgetInfo.DIALOG_NPC_TEXT) != null && !lastNPCText.equals(Text.sanitizeMultilineText((client.getWidget(WidgetInfo.DIALOG_NPC_TEXT)).getText()))) {
             Widget npcDialog = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
@@ -185,9 +190,35 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         }
     }
 
+    //sets the overhead text
+    public void npcOverheadText(Actor a, String dialogue) {
+        int startingTick = client.getTickCount();
+        a.setOverheadText(dialogue);
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        // your code here
+                        a.setOverheadText("");
+                    }
+                },
+                3000
+        );
+        /*
+        while(trackingTick <= startingTick + 5){
+            log.info(a.getName() + " says:" + dialogue);
+            log.info("Current tick: " + trackingTick + " | Target tick: " + (startingTick + 5));
+            a.setOverheadText(dialogue);
+        }
+        a.setOverheadText("");*/
+    }
+
+
     @Subscribe
     public void onGameTick(GameTick event) {
+        trackingTick++;
+
     	npcDialog();
-    	npcWalkingTextInvoker();
+    	npcTextInvoker();
     }
 }

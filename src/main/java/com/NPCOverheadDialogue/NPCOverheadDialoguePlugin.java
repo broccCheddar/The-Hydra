@@ -62,57 +62,79 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         return configManager.getConfig(NPCOverheadDialogueConfig.class);
     }
 
-    /*
+
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged) {
     	log.info("animation changed for: " + animationChanged.getActor().getName());
-        if (animationChanged!= null && animationChanged.getActor().getName().equals("Reldo")) {
-            ambientNPCText(animationChanged.getActor(), "Reldo", "I am a librarian look at me walk");
+        NPC npc = null;
+    	if(animationChanged.getActor() instanceof  NPC){
+    	    npc = (NPC) animationChanged.getActor();
+    	}
+        if(npc != null && npc.isDead()){
+            //for death text, best option for slayer item killed monsters
+            hitsplatNPCText(animationChanged.getActor(), "Giant rat", "I am a dead giant rat");
+            hitsplatNPCText(animationChanged.getActor(), "Gargoyle", "*crumbles*");
         }
     }
-     */
+
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event) {
         //for hitsplat text
-        if(event.getHitsplat().getAmount() > 0 && event.getActor().getHealth() > 0) {
-            ambientNPCText(event.getActor(), "Rat", "hiss", true);
-            ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat", true);
+        log.info(event.getActor().getName() + " health is " + event.getActor().getHealth());
+        NPC npc = null;
+        if(event.getActor() instanceof NPC){
+            npc = (NPC) event.getActor();
+        }
+        if(npc != null) {
+            if (event.getHitsplat().getAmount() > 0 && (event.getActor().getHealth() > 0 || event.getActor().getHealth() == -1) && !npc.isDead()) {
+                hitsplatNPCText(event.getActor(), "Rat", "hiss");
+                hitsplatNPCText(event.getActor(), "Giant rat", "I am a giant rat");
+                log.info("hitsplat applied on " + event.getActor().getName());
+            }
         }
         //for death text
-        else if(event.getActor().getHealth() <= 0){
-            ambientNPCText(event.getActor(), "Rat", "hisssssssssssssss", true);
+        /*
+        else if (event.getActor().getHealth() == 0) {
+            hitsplatNPCText(event.getActor(), "Rat", "hisssssssssssssss");
+            hitsplatNPCText(event.getActor(), "Giant rat", "I am a dead giant rat");
+        }*/
+    }
+
+    //for hitsplat text rendering
+    public void hitsplatNPCText(Actor actor, String npcName, String dialogue) {
+        if (actor != null && Objects.equals(actor.getName(), npcName)) {
+            int npcIndex = npcExistence((NPC) actor);
+            NPCList.get(npcIndex).setNPCDialog(dialogue);
+            if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 2) {
+                npcOverheadText(actor, dialogue);
+                NPCList.get(npcIndex).setInCombat(true);
+                log.info(actor.getName() + " #" + npcIndex + " dialogue is set to: " + dialogue);
+                NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
+                //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
+            }/*else {
+                    NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
+                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
+                }*/
         }
     }
 
     //for ambient text or hitsplat text rendering
-    public void ambientNPCText(Actor actor, String npcName, String dialogue, boolean hitsplat) {
+    public void ambientNPCText(Actor actor, String npcName, String dialogue) {
         if (actor != null && Objects.equals(actor.getName(), npcName)) {
             int npcIndex = npcExistence((NPC) actor);
             NPCList.get(npcIndex).setNPCDialog(dialogue);
-            if (hitsplat) {
-                if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 2) {
-                    npcOverheadText(actor, dialogue);
-                    NPCList.get(npcIndex).setInCombat(true);
-                    log.info(actor.getName() + " #" + npcIndex + " dialogue is set to: " + dialogue);
-                    NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
-                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
-                } /*else {
-                    NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
-                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
-                }*/
+            if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 10 && (int) (Math.random() * ((10 - 1) + 1)) > 5) {
+                npcOverheadText(actor, dialogue);
+                NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
+                //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
             } else {
-                if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 10 && (int) (Math.random() * ((10 - 1) + 1)) > 5) {
-                    npcOverheadText(actor, dialogue);
-                    NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
-                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
-                } else {
-                    NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
-                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
-                }
+                NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
+                //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
             }
         }
     }
+
 
     //runs every game tick
     //checks all local NPCs for movement overhead text and applies if necessary
@@ -121,8 +143,9 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         //For when NPCs are moving
         List<NPC> localNPCs = client.getNpcs();
         for (NPC localNPC : localNPCs) {
-            ambientNPCText(localNPC, "Rod Fishing spot", "*blub* *blub*", false);
-
+            //ambient texts
+            ambientNPCText(localNPC, "Rod Fishing spot", "*blub* *blub*");
+            //walking texts
             npcWalkingText(localNPC, "Reldo", "I am a librarian");
             npcWalkingText(localNPC, "Cleaner", "*Sweep* *Sweep*");
         }
@@ -221,7 +244,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         npcDialog();
         npcTextInvoker();
         for (int i = 0; i < NPCList.size(); i++) {
-            if(NPCList.get(i).getInCombat()) {
+            if (NPCList.get(i).getInCombat()) {
                 if (NPCList.get(i).getNPCDialog() != null && NPCList.get(i).getNpcTicksSinceDialogStart() >= 2) {
                     NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
                     NPCList.get(i).setNPCDialog(null);
@@ -232,8 +255,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                     NPCList.get(i).incrementNPCTicksSinceDialogStart();
                     //log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text refreshed with " + NPCList.get(i).getNpcTicksSinceDialogStart() + " ticks");
                 }
-            }
-            else{
+            } else {
                 if (NPCList.get(i).getNPCDialog() != null && NPCList.get(i).getNpcTicksSinceDialogStart() >= 5) {
                     NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
                     NPCList.get(i).setNPCDialog(null);

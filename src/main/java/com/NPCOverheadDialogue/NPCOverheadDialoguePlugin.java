@@ -84,8 +84,16 @@ public class NPCOverheadDialoguePlugin extends Plugin {
             int npcIndex = npcExistence((NPC) actor);
             NPCList.get(npcIndex).setNPCDialog(dialogue);
             if (hitsplat) {
-                npcOverheadText(actor, dialogue);
-                log.info(dialogue);
+                if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 2) {
+                    npcOverheadText(actor, dialogue);
+                    NPCList.get(npcIndex).setInCombat(true);
+                    log.info(actor.getName() + " dialogue is set to: " + dialogue);
+                    NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
+                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
+                } else {
+                    NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
+                    //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
+                }
             } else {
                 if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 10 && (int) (Math.random() * ((10 - 1) + 1)) > 5) {
                     npcOverheadText(actor, dialogue);
@@ -195,7 +203,6 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     //sets the overhead text
     public void npcOverheadText(Actor a, String dialogue) {
-        int startingTick = client.getTickCount();
         a.setOverheadText(dialogue);
     }
 
@@ -205,12 +212,24 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         npcDialog();
         npcTextInvoker();
         for (int i = 0; i < NPCList.size(); i++) {
-            if (NPCList.get(i).getNpcTicksSinceDialogStart() >= 5) {
-                NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
-                NPCList.get(i).setNPCDialog(null);
-                log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 5 ticks");
-            } else {
-                NPCList.get(i).getNPCWithTicksActor().setOverheadText(NPCList.get(i).getNPCDialog());
+            if(NPCList.get(i).getInCombat()) {
+                if (NPCList.get(i).getNPCDialog() != null && NPCList.get(i).getNpcTicksSinceDialogStart() >= 2) {
+                    NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
+                    NPCList.get(i).setNPCDialog(null);
+                    NPCList.get(i).setInCombat(false);
+                    log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 5 ticks");
+                } else {
+                    NPCList.get(i).getNPCWithTicksActor().setOverheadText(NPCList.get(i).getNPCDialog());
+                }
+            }
+            else{
+                if (NPCList.get(i).getNPCDialog() != null && NPCList.get(i).getNpcTicksSinceDialogStart() >= 5) {
+                    NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
+                    NPCList.get(i).setNPCDialog(null);
+                    log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 5 ticks");
+                } else {
+                    NPCList.get(i).getNPCWithTicksActor().setOverheadText(NPCList.get(i).getNPCDialog());
+                }
             }
         }
     }

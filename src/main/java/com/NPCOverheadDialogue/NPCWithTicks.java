@@ -14,7 +14,8 @@ public class NPCWithTicks {
     private int npcTicksSinceDialogStart = 10;
     private int lastXCoordinate;
     private int lastYCoordinate;
-    private boolean hasDialog;
+    private boolean inCombat = false;
+    //private boolean hasDialog;
     public NPCWithTicks(String name, int id, Actor npcActor, NPC npc, int startingTick, int x, int y){
         NPCWithTicksActor = npcActor;
         NPCWithTicksNPC = npc;
@@ -42,11 +43,11 @@ public class NPCWithTicks {
 
     public int getLastYCoordinate(){return lastYCoordinate;}
 
-    public boolean getHasDialog(){return hasDialog;}
+    //public boolean getHasDialog(){return hasDialog;}
 
     public String getNPCDialog(){return NPCDialog;}
 
-
+    public boolean getInCombat(){return inCombat;}
 
 
     public void setNPCName(String name){NPCName = name;}
@@ -61,7 +62,7 @@ public class NPCWithTicks {
 
     public void setLastYCoordinate(int y){lastYCoordinate = y;}
 
-    public void setHasDialog(boolean dialog){hasDialog = dialog;}
+    //public void setHasDialog(boolean dialog){hasDialog = dialog;}
 
     public void setNPCDialog(String d){NPCDialog = d;}
 
@@ -70,4 +71,6 @@ public class NPCWithTicks {
     public void incrementNPCTicksWithoutMoving(){npcTicksWithoutMoving++;}
 
     public void incrementNPCTicksSinceDialogStart(){npcTicksSinceDialogStart++;}
+
+    public void setInCombat(boolean ic){inCombat = ic;}
 }

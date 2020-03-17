@@ -74,13 +74,18 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event) {
-        if(event.getHitsplat().getAmount() > 0) {
+        //for hitsplat text
+        if(event.getHitsplat().getAmount() > 0 && event.getActor().getHealth() > 0) {
             ambientNPCText(event.getActor(), "Rat", "hiss", true);
             ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat", true);
         }
+        //for death text
+        else if(event.getActor().getHealth() <= 0){
+            ambientNPCText(event.getActor(), "Rat", "hisssssssssssssss", true);
+        }
     }
 
-    //for ambient text or hitsplat text
+    //for ambient text or hitsplat text rendering
     public void ambientNPCText(Actor actor, String npcName, String dialogue, boolean hitsplat) {
         if (actor != null && Objects.equals(actor.getName(), npcName)) {
             int npcIndex = npcExistence((NPC) actor);
@@ -111,11 +116,13 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     //runs every game tick
     //checks all local NPCs for movement overhead text and applies if necessary
+    //for ambient and walking text
     public void npcTextInvoker() {
         //For when NPCs are moving
         List<NPC> localNPCs = client.getNpcs();
         for (NPC localNPC : localNPCs) {
             ambientNPCText(localNPC, "Rod Fishing spot", "*blub* *blub*", false);
+
             npcWalkingText(localNPC, "Reldo", "I am a librarian");
             npcWalkingText(localNPC, "Cleaner", "*Sweep* *Sweep*");
         }
@@ -142,7 +149,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
         return npcIndex;
     }
 
-    //for walking text
+    //for walking text rendering
     public void npcWalkingText(NPC npc, String npcName, String dialogue) {
         if (npc != null && Objects.equals(npc.getName(), npcName)) {
             WorldPoint npcPos = npc.getWorldLocation();

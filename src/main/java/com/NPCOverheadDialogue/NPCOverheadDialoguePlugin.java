@@ -74,8 +74,10 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event) {
-        ambientNPCText(event.getActor(), "Rat", "hiss", true);
-        ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat", true);
+        if(event.getHitsplat().getAmount() > 0) {
+            ambientNPCText(event.getActor(), "Rat", "hiss", true);
+            ambientNPCText(event.getActor(), "Giant rat", "I am a giant rat", true);
+        }
     }
 
     //for ambient text or hitsplat text
@@ -87,13 +89,13 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                 if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 2) {
                     npcOverheadText(actor, dialogue);
                     NPCList.get(npcIndex).setInCombat(true);
-                    log.info(actor.getName() + " dialogue is set to: " + dialogue);
+                    log.info(actor.getName() + " #" + npcIndex + " dialogue is set to: " + dialogue);
                     NPCList.get(npcIndex).setNPCTicksSinceDialogStart(0);
                     //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ambient ticks set to 0");
-                } else {
+                } /*else {
                     NPCList.get(npcIndex).incrementNPCTicksSinceDialogStart();
                     //log.info(NPCList.get(npcIndex).getNPCName() + " : " + NPCList.get(npcIndex).getNPCID() + " : ticks since ambient start : " + NPCList.get(npcIndex).getNpcTicksSinceDialogStart());
-                }
+                }*/
             } else {
                 if (NPCList.get(npcIndex).getNpcTicksSinceDialogStart() >= 10 && (int) (Math.random() * ((10 - 1) + 1)) > 5) {
                     npcOverheadText(actor, dialogue);
@@ -217,9 +219,11 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                     NPCList.get(i).getNPCWithTicksActor().setOverheadText(null);
                     NPCList.get(i).setNPCDialog(null);
                     NPCList.get(i).setInCombat(false);
-                    log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 5 ticks");
+                    log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 2 ticks");
                 } else {
                     NPCList.get(i).getNPCWithTicksActor().setOverheadText(NPCList.get(i).getNPCDialog());
+                    NPCList.get(i).incrementNPCTicksSinceDialogStart();
+                    //log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text refreshed with " + NPCList.get(i).getNpcTicksSinceDialogStart() + " ticks");
                 }
             }
             else{
@@ -229,6 +233,7 @@ public class NPCOverheadDialoguePlugin extends Plugin {
                     log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text removed due to 5 ticks");
                 } else {
                     NPCList.get(i).getNPCWithTicksActor().setOverheadText(NPCList.get(i).getNPCDialog());
+                    //log.info(NPCList.get(i).getNPCName() + " #" + i + " overhead text refreshed with " + NPCList.get(i).getNpcTicksSinceDialogStart() + " ticks");
                 }
             }
         }

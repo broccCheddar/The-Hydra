@@ -2,6 +2,7 @@ package com.NPCOverheadDialogue;
 
 import com.google.inject.Provides;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,15 +12,19 @@ import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.NPCManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
+import net.runelite.http.api.npc.NpcInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @PluginDescriptor(
@@ -31,6 +36,12 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     @Inject
     private NPCOverheadDialogueConfig config;
+
+    @Inject
+    ClientThread clientThread;
+
+    @Inject
+    NPCManager npcManager;
 
     private Actor actor;
     private String lastNPCText = "";
@@ -65,34 +76,42 @@ public class NPCOverheadDialoguePlugin extends Plugin {
 
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged) {
-    	log.info("animation changed for: " + animationChanged.getActor().getName());
+        //log.info("animation changed for: " + animationChanged.getActor().getName());
         NPC npc = null;
-    	if(animationChanged.getActor() instanceof  NPC){
-    	    npc = (NPC) animationChanged.getActor();
-    	}
-        if(npc != null && npc.isDead()){
+        if (animationChanged.getActor() instanceof NPC) {
+            npc = (NPC) animationChanged.getActor();
+        }
+        if (npc != null && npc.isDead()) {
             //for death text, best option for slayer item killed monsters
-            hitsplatNPCText(animationChanged.getActor(), "Giant rat", "I am a dead giant rat");
+            //hitsplatNPCText(animationChanged.getActor(), "Giant rat", "I am a dead giant rat");
             hitsplatNPCText(animationChanged.getActor(), "Gargoyle", "*crumbles*");
         }
     }
 
-
     @Subscribe
     public void onHitsplatApplied(HitsplatApplied event) {
-        //for hitsplat text
-        log.info(event.getActor().getName() + " health is " + event.getActor().getHealth());
-        NPC npc = null;
-        if(event.getActor() instanceof NPC){
-            npc = (NPC) event.getActor();
-        }
-        if(npc != null) {
-            if (event.getHitsplat().getAmount() > 0 && (event.getActor().getHealth() > 0 || event.getActor().getHealth() == -1) && !npc.isDead()) {
-                hitsplatNPCText(event.getActor(), "Rat", "hiss");
-                hitsplatNPCText(event.getActor(), "Giant rat", "I am a giant rat");
-                log.info("hitsplat applied on " + event.getActor().getName());
+        //log.info(event.getActor().getName() + " health is " + (event.getActor().getHealthRatio()* npcManager.getHealth(npc.getId()))/event.getActor().getHealth() + " outside the thread");
+        clientThread.invokeLater(() -> {
+            NPC npc = null;
+            if (event.getActor() instanceof NPC) {
+                npc = (NPC) event.getActor();
             }
-        }
+            if (npc != null) {
+                log.info(event.getActor().getName() + " health is " + (event.getActor().getHealthRatio()* npcManager.getHealth(npc.getId()))/event.getActor().getHealth() + " inside the thread");
+                if (event.getHitsplat().getAmount() > 0 /*&& (event.getActor().getHealth() > 0 || event.getActor().getHealth() == -1)*/ && !npc.isDead()) {
+                    //for hitsplat text
+                    hitsplatNPCText(event.getActor(), "Rat", "hiss");
+                    hitsplatNPCText(event.getActor(), "Giant rat", "I am a giant rat");
+                    log.info("hitsplat applied on " + event.getActor().getName());
+                }
+                else if(npc.isDead()){
+                    //for death text
+                    hitsplatNPCText(event.getActor(), "Giant rat", "I am a dead giant rat");
+                    hitsplatNPCText(event.getActor(), "Rat", "hissssssssssssss");
+                }
+            }
+        });
+
         //for death text
         /*
         else if (event.getActor().getHealth() == 0) {

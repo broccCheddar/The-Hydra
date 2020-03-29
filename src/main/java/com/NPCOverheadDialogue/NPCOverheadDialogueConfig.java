@@ -8,12 +8,48 @@ import net.runelite.client.config.ConfigItem;
 public interface NPCOverheadDialogueConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "dialogBoxText",
+		name = "Display Dialog Box Text Overhead",
+		description = "Displays dialog in the dialog box above the corresponding NPC"
 	)
-	default String greeting()
+	default boolean showDialogBoxText()
 	{
-		return "Hello";
+		return false;
+	}
+	@ConfigItem(
+			keyName = "ambientDialog",
+			name = "Display Ambient Dialog Overhead",
+			description = "Displays ambient dialog above NPCs"
+	)
+	default boolean showAmbientDialog()
+	{
+		return false;
+	}
+	@ConfigItem(
+			keyName = "damageDialog",
+			name = "Display Damage Dialog Overhead",
+			description = "Displays damage dialog above NPCs"
+	)
+	default boolean showDamageDialog()
+	{
+		return false;
+	}
+	@ConfigItem(
+			keyName = "deathDialog",
+			name = "Display Death Dialog Overhead",
+			description = "Displays death dialog above NPCs"
+	)
+	default boolean showDeathDialog()
+	{
+		return false;
+	}
+	@ConfigItem(
+			keyName = "walkingDialog",
+			name = "Display Walking Dialog Overhead",
+			description = "Displays walking dialog above NPCs"
+	)
+	default boolean showWalkingDialog()
+	{
+		return false;
 	}
 }

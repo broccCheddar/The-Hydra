@@ -13,8 +13,11 @@ public enum DialogNpc
     CLEANER("Cleaner", DialogCategories.CLEANER),
     ROD_FISHING_SPOT("Rod Fishing spot", DialogCategories.FISHING_SPOT),
     FISHING_SPOT("Fishing spot", DialogCategories.FISHING_SPOT),
-    RAT("Rat", DialogCategories.CRITTERS),
-    GARGOYLE("Gargoyle", DialogCategories.UNDEAD),
+    RAT("Rat", DialogCategories.RATS),
+    GIANT_RAT("Giant rat", DialogCategories.RATS),
+    RABBIT("Rabbit", DialogCategories.MID_SIZED_RODENTS),
+    SQUIRREL("Squirrel", DialogCategories.MID_SIZED_RODENTS),
+    GARGOYLE("Gargoyle", DialogCategories.SKELETONS),
     ;
 
     private final String npcName;

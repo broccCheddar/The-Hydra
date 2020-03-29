@@ -27,12 +27,17 @@ public enum DialogCategories
             null,
             null,
             null),
-    CRITTERS(
+    RATS(
             new String[]{"*scamper* *scamper*"},
             new String[]{"hiss"},
             new String[]{"hissssssssssssss"},
             null),
-    UNDEAD(
+    MID_SIZED_RODENTS(
+            new String[]{"*nibble* *nibble*"},
+            new String[]{"squeak!"},
+            new String[]{"squeeaak..."},
+            null),
+    SKELETONS(
             null,
             null,
             new String[]{"*crumbles*"},

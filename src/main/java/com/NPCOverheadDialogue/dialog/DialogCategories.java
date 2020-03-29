@@ -11,7 +11,7 @@ public enum DialogCategories
             new String[]{"I am a librarian", "shhhhhh", "I have always imagined that paradise will be a kind of Library"},
             null,
             null,
-            null),
+            new String[]{"I am a walking librarian"}),
     STORE_CLERK(
             new String[]{"Come check out my wares!", "I have the best prices around", "Buying all junk", "Bank sale"},
             null,
@@ -21,7 +21,7 @@ public enum DialogCategories
             null,
             null,
             null,
-            new String[] {"*Sweep* *Sweep*", "Time for a break!", "I just swept there!"}),
+            new String[] {"*sweep* *sweep*", "Time for a break!", "I just swept there!", "*whistles*"}),
     FISHING_SPOT(
             new String[]{"*blub* *blub*", "*splash*"},
             null,

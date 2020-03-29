@@ -87,7 +87,7 @@ public class NPCOverheadDialoguePlugin extends Plugin
         {
             return;
         }
-        if(event.getSource() != actor && actor != null){
+        if(config.showDialogBoxText() && event.getSource() != actor && actor != null){
             actor.setOverheadText(null);
         }
         lastNPCText = "";
@@ -98,14 +98,14 @@ public class NPCOverheadDialoguePlugin extends Plugin
     @Subscribe
     public void onAnimationChanged(AnimationChanged animationChanged)
     {
-        log.info("animation changed for: " + animationChanged.getActor().getName());
+        //log.info("animation changed for: " + animationChanged.getActor().getName());
         if (!(animationChanged.getActor() instanceof NPC))
         {
             return;
         }
 
         final NPC npc = (NPC) animationChanged.getActor();
-        if (npc.isDead() && npc.getName() != null)
+        if (config.showDeathDialog() && npc.isDead() && npc.getName() != null)
         {
             //for death text, best option for slayer item killed monsters
             final DialogNpc dialogNpc = DialogNpc.getDialogNpcsByNpcName(Text.escapeJagex(npc.getName()));
@@ -152,7 +152,7 @@ public class NPCOverheadDialoguePlugin extends Plugin
             return;
         }
 
-        if (npc.isDead())
+        if (config.showDeathDialog() && npc.isDead())
         {
             final String[] dialogues = dialogNpc.getDeathDialogs();
             if (dialogues != null)
@@ -164,7 +164,7 @@ public class NPCOverheadDialoguePlugin extends Plugin
             }
         }
 
-        if (event.getHitsplat().getAmount() > 0)
+        if (config.showDamageDialog() && event.getHitsplat().getAmount() > 0)
         {
             final String[] dialogues = dialogNpc.getDamageDialogs();
             if (dialogues == null)
@@ -182,7 +182,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
     {
         if (actor != null)
         {
-            checkWidgetDialogs();
+            if(config.showDialogBoxText()) {
+                checkWidgetDialogs();
+            }
             if (actorTextTick > 0 && client.getTickCount() - actorTextTick > SLOW_TICK_TIMEOUT)
             {
                 actor.setOverheadText(null);
@@ -242,8 +244,12 @@ public class NPCOverheadDialoguePlugin extends Plugin
                 continue;
             }
 
-            checkWalkingDialog(npc, state);
-            checkAmbientDialog(npc, state);
+            if(config.showWalkingDialog()) {
+                checkWalkingDialog(npc, state);
+            }
+            if(config.showAmbientDialog()) {
+                checkAmbientDialog(npc, state);
+            }
         }
     }
 
@@ -257,7 +263,8 @@ public class NPCOverheadDialoguePlugin extends Plugin
 
         if (hasNpcMoved(npc))
         {
-            state.setTicksWithoutMoving(0);
+            //log.info(npc + " has moved");
+
 
             final String[] dialogues = dialogNpc.getWalkingDialogs();
             if (dialogues == null)
@@ -266,14 +273,18 @@ public class NPCOverheadDialoguePlugin extends Plugin
             }
 
             final String dialogue = dialogues[RANDOM.nextInt(dialogues.length)];
+            //log.info(state.getTicksWithoutMoving() + " ticks without moving, and " + MOVING_TICK_DELAY + " is the delay");
             if (state.getTicksWithoutMoving() > MOVING_TICK_DELAY)
             {
                 setOverheadText(dialogue, npc, state);
+                state.setTicksWithoutMoving(0);
+                log.info("set " + npc + " overhead text");
             }
         }
         else
         {
             state.setTicksWithoutMoving(state.getTicksWithoutMoving() + 1);
+            log.info("state's ticks without moving has been incremented to " + state.getTicksWithoutMoving());
         }
     }
 
@@ -335,7 +346,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
 
         final WorldPoint npcPos = npc.getWorldLocation();
         final WorldPoint lastNpcPos = new WorldPoint(state.getLastXCoordinate(), state.getLastYCoordinate(), -1);
-
+        log.info("npc has moved? : " + (npcPos.distanceTo2D(lastNpcPos) > 0) + " : " + npcPos.distanceTo2D(lastNpcPos));
+        state.setLastXCoordinate(npc.getWorldLocation().getX());
+        state.setLastYCoordinate(npc.getWorldLocation().getY());
         return npcPos.distanceTo2D(lastNpcPos) > 0;
     }
 

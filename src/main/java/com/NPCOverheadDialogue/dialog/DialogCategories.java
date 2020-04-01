@@ -7,23 +7,43 @@ import lombok.Getter;
 @Getter
 public enum DialogCategories
 {
-    LIBRARIAN(
-            new String[]{"I am a librarian", "shhhhhh", "I have always imagined that paradise will be a kind of Library"},
-            null,
-            null,
-            new String[]{"I am a walking librarian"}),
-    STORE_CLERK(
-            new String[]{"Come check out my wares!", "I have the best prices around", "Buying all junk", "Bank sale"},
-            null,
-            null,
-            null),
     CLEANER(
             null,
             null,
             null,
             new String[] {"*sweep* *sweep*", "Time for a break!", "I just swept there!", "*whistles*"}),
+    DUCKS(
+            new String[]{"Quack!", "Quack! Quack!"},
+            null,
+            null,
+            null),
     FISHING_SPOT(
             new String[]{"*blub* *blub*", "*splash*"},
+            null,
+            null,
+            null),
+    HONKING_BIRDS(
+            new String[]{"Honk!", "Honk! Honk!"},
+            null,
+            null,
+            null),
+    LENNY(
+            new String[]{"I sure love the rabbits!", "Gotta tend the rabbits!"},
+            null,
+            null,
+            null),
+    LIBRARIAN(
+            new String[]{"I am a librarian", "shhhhhh", "I have always imagined that paradise will be a kind of Library"},
+            null,
+            null,
+            new String[]{"I am a walking librarian"}),
+    MID_SIZED_RODENTS(
+            new String[]{"*nibble* *nibble*"},
+            new String[]{"squeak!"},
+            new String[]{"squeeaak..."},
+            null),
+    PIGS(
+            new String[]{"Oink!"},
             null,
             null,
             null),
@@ -32,17 +52,21 @@ public enum DialogCategories
             new String[]{"hiss"},
             new String[]{"hissssssssssssss"},
             null),
-    MID_SIZED_RODENTS(
-            new String[]{"*nibble* *nibble*"},
-            new String[]{"squeak!"},
-            new String[]{"squeeaak..."},
+    SEAGULLS(
+            new String[]{"Squawk!"},
+            null,
+            null,
             null),
     SKELETONS(
             null,
             null,
             new String[]{"*crumbles*"},
-            null
-    )
+            null),
+    STORE_CLERK(
+            new String[]{"Come check out my wares!", "I have the best prices around", "Buying all junk", "Bank sale"},
+            null,
+            null,
+            null)
     ;
 
     private final String[] ambientDialogs;

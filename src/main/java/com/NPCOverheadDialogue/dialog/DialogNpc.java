@@ -9,15 +9,42 @@ import org.apache.commons.lang3.ArrayUtils;
 @Getter
 public enum DialogNpc
 {
-    RELDO("Reldo", DialogCategories.LIBRARIAN),
     CLEANER("Cleaner", DialogCategories.CLEANER),
-    ROD_FISHING_SPOT("Rod Fishing spot", DialogCategories.FISHING_SPOT),
+
+    DRAKE("Drake", DialogCategories.DUCKS),
+    DUCK("Duck", DialogCategories.DUCKS),
+    DUCKLING("Duckling", DialogCategories.DUCKS),
+
     FISHING_SPOT("Fishing spot", DialogCategories.FISHING_SPOT),
-    RAT("Rat", DialogCategories.RATS),
-    GIANT_RAT("Giant rat", DialogCategories.RATS),
+    ROD_FISHING_SPOT("Rod Fishing spot", DialogCategories.FISHING_SPOT),
+
+    BLACK_SWAN("Black swan", DialogCategories.HONKING_BIRDS),
+    CORMORANT("Cormorant", DialogCategories.HONKING_BIRDS),
+    GOOSE("Goose", DialogCategories.HONKING_BIRDS),
+    SWAN("Swan", DialogCategories.HONKING_BIRDS),
+
+    RELDO("Reldo", DialogCategories.LIBRARIAN),
+
+    LENNY("Lenny", DialogCategories.LENNY),
+
+    BABY_MOLE("Baby Mole", DialogCategories.MID_SIZED_RODENTS),
     RABBIT("Rabbit", DialogCategories.MID_SIZED_RODENTS),
+    RED_PANDA("Red Panda", DialogCategories.MID_SIZED_RODENTS),
     SQUIRREL("Squirrel", DialogCategories.MID_SIZED_RODENTS),
+
+    PIG("Pig", DialogCategories.PIGS),
+    PIGLET("Piglet", DialogCategories.PIGS),
+
+    GIANT_RAT("Giant rat", DialogCategories.RATS),
+    RAT("Rat", DialogCategories.RATS),
+
+    GULLS("Gull", DialogCategories.SEAGULLS),
+    PELICAN("Pelican", DialogCategories.SEAGULLS),
+    SEAGULL("Seagull", DialogCategories.SEAGULLS),
+
     GARGOYLE("Gargoyle", DialogCategories.SKELETONS),
+    SKELETON("Skeleton", DialogCategories.SKELETONS)
+
     ;
 
     private final String npcName;

@@ -17,6 +17,11 @@ public enum DialogCategories
             null,
             null,
             null),
+    DRAGONS(
+            new String[]{"*snarl*", "Roar!", "*stomp* *stomp*"},
+            null,
+            null,
+            null),
     FISHING_SPOT(
             new String[]{"*blub* *blub*", "*splash*"},
             null,

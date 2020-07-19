@@ -307,17 +307,24 @@ public class NPCOverheadDialoguePlugin extends Plugin
         else
         {
             state.setTicksWithoutMoving(state.getTicksWithoutMoving() + 1);
-            log.info("state's ticks without moving has been incremented to " + state.getTicksWithoutMoving());
+            //log.info("state's ticks without moving has been incremented to " + state.getTicksWithoutMoving());
         }
     }
 
     private void checkAmbientDialog(final NPC npc, final ActorDialogState state)
     {
-        DialogNpc dialogNpc = DialogNpc.getDialogNpcsByNpcName(Text.escapeJagex(MoreObjects.firstNonNull(npc.getName(), "")));
+        //DialogNpc dialogNpc = DialogNpc.getDialogNpcsByNpcName(Text.escapeJagex(MoreObjects.firstNonNull(npc.getName(), "")));
+        DialogNpc dialogNpc = DialogNpc.getDialogNpcsByNpcID(npc.getId());
+
+        if (dialogNpc == null)
+        {
+            dialogNpc = DialogNpc.getDialogNpcsByNpcName(Text.escapeJagex(MoreObjects.firstNonNull(npc.getName(), "")));
+        }
         if (dialogNpc == null)
         {
             return;
         }
+        log.info("NPC being checked is: " + dialogNpc.getNpcName() + " with an npcID of: " + dialogNpc.getNpcID());
 
         final String[] dialogues = dialogNpc.getAmbientDialogs();
         if (dialogues == null)
@@ -326,10 +333,11 @@ public class NPCOverheadDialoguePlugin extends Plugin
         }
 
         if ((client.getTickCount() - state.getDialogChangeTick()) >= AMBIENT_TICK_TIMEOUT
-                && (RANDOM.nextInt(100) + 1) <= 1)
+                && (RANDOM.nextInt(100) + 1) <= 80)
         {
             final String dialogue = dialogues[RANDOM.nextInt(dialogues.length)];
             setOverheadText(dialogue, npc, state);
+            log.info(npc.getName() + " said: " + dialogue);
         }
     }
 
@@ -369,7 +377,7 @@ public class NPCOverheadDialoguePlugin extends Plugin
 
         final WorldPoint npcPos = npc.getWorldLocation();
         final WorldPoint lastNpcPos = new WorldPoint(state.getLastXCoordinate(), state.getLastYCoordinate(), -1);
-        log.info("npc has moved? : " + (npcPos.distanceTo2D(lastNpcPos) > 0) + " : " + npcPos.distanceTo2D(lastNpcPos));
+        //log.info("npc has moved? : " + (npcPos.distanceTo2D(lastNpcPos) > 0) + " : " + npcPos.distanceTo2D(lastNpcPos));
         state.setLastXCoordinate(npc.getWorldLocation().getX());
         state.setLastYCoordinate(npc.getWorldLocation().getY());
         return npcPos.distanceTo2D(lastNpcPos) > 0;

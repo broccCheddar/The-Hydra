@@ -15,6 +15,8 @@ public enum DialogNpc
     DUCK("Duck", -1, DialogCategories.DUCKS),
     DUCKLING("Duckling", -1, DialogCategories.DUCKS),
 
+    DRAKE_DRAGON("Drake", -1, DialogCategories.DRAGONS),
+
     FISHING_SPOT("Fishing spot", -1, DialogCategories.FISHING_SPOT),
     ROD_FISHING_SPOT("Rod Fishing spot", -1, DialogCategories.FISHING_SPOT),
 
@@ -89,7 +91,8 @@ public enum DialogNpc
 
     @Nullable
     public static DialogNpc getDialogNpcsByNpcID(final int npcID) {
-        return NAME_MAP.get(npcID);
+        //log.info("ID being checked is " + npcID);
+        return NAME_MAP.get(Integer.toString(npcID));
     }
 
     @Nullable

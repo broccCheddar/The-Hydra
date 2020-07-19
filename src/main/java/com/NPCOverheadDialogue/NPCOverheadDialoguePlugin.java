@@ -333,7 +333,7 @@ public class NPCOverheadDialoguePlugin extends Plugin
         }
 
         if ((client.getTickCount() - state.getDialogChangeTick()) >= AMBIENT_TICK_TIMEOUT
-                && (RANDOM.nextInt(100) + 1) <= 80)
+                && (RANDOM.nextInt(100) + 1) <= 1)
         {
             final String dialogue = dialogues[RANDOM.nextInt(dialogues.length)];
             setOverheadText(dialogue, npc, state);

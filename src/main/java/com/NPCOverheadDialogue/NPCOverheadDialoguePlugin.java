@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Actor;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.NPC;
@@ -351,6 +352,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
         {
             lastNPCText = npcDialogText;
             actor.setOverheadText(npcDialogText);
+            if(config.enableChatDialog()){
+                client.addChatMessage(ChatMessageType.PUBLICCHAT,actor.getName(), npcDialogText, actor.getName());
+            }
             actorTextTick = client.getTickCount();
         }
 
@@ -361,6 +365,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
             if (client.getLocalPlayer() != null)
             {
                 client.getLocalPlayer().setOverheadText(playerDialogText);
+                if(config.enableChatDialog()){
+                    client.addChatMessage(ChatMessageType.PUBLICCHAT,client.getLocalPlayer().getName(), playerDialogText, client.getLocalPlayer().getName());
+                }
                 playerTextTick = client.getTickCount();
             }
         }
@@ -413,6 +420,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
         }
         state.setDialog(dialogue);
         actor.setOverheadText(dialogue);
+        if(config.enableChatDialog()){
+            client.addChatMessage(ChatMessageType.PUBLICCHAT,actor.getName(), dialogue, actor.getName());
+        }
     }
     private String getWidgetTextSafely(final WidgetInfo info)
     {

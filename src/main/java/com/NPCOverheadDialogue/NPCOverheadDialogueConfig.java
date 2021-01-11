@@ -52,4 +52,13 @@ public interface NPCOverheadDialogueConfig extends Config
 	{
 		return false;
 	}
+	@ConfigItem(
+			keyName = "chatDialog",
+			name = "Display Overhead Dialog in Chat",
+			description = "Displays all enabled dialog in the chat"
+	)
+	default boolean enableChatDialog()
+	{
+		return false;
+	}
 }

@@ -3,6 +3,8 @@ package com.NPCOverheadDialogue;
 import com.NPCOverheadDialogue.dialog.DialogNpc;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Provides;
+
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +26,9 @@ import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.NPCManager;
@@ -54,6 +59,9 @@ public class NPCOverheadDialoguePlugin extends Plugin
 
     @Inject
     private NPCManager npcManager;
+
+    @Inject
+    private ChatMessageManager chatMessageManager;
 
     private final Map<Actor, ActorDialogState> dialogStateMap = new HashMap<>();
     private Actor actor = null;
@@ -342,9 +350,10 @@ public class NPCOverheadDialoguePlugin extends Plugin
         }
     }
 
+
     private void checkWidgetDialogs()
     {
-        final String npcDialogText = getWidgetTextSafely(WidgetInfo.DIALOG_NPC_TEXT);
+        final String npcDialogText = getWidgetTextSafely();
         final String playerDialogText = getWidgetTextSafely(WidgetID.DIALOG_PLAYER_GROUP_ID, 4);
 
         // For when the NPC has dialog
@@ -352,9 +361,17 @@ public class NPCOverheadDialoguePlugin extends Plugin
         {
             lastNPCText = npcDialogText;
             actor.setOverheadText(npcDialogText);
-            if(config.enableChatDialog()){
-                client.addChatMessage(ChatMessageType.PUBLICCHAT,actor.getName(), npcDialogText, actor.getName());
-            }
+
+            final ChatMessageBuilder message = new ChatMessageBuilder()
+                    .append(Color.RED, actor.getName())
+                    .append(": ")
+                    .append(Color.BLUE, npcDialogText);
+
+            chatMessageManager.queue(QueuedMessage.builder()
+                    .type(ChatMessageType.GAMEMESSAGE)
+                    .runeLiteFormattedMessage(message.build())
+                    .build());
+
             actorTextTick = client.getTickCount();
         }
 
@@ -365,9 +382,18 @@ public class NPCOverheadDialoguePlugin extends Plugin
             if (client.getLocalPlayer() != null)
             {
                 client.getLocalPlayer().setOverheadText(playerDialogText);
-                if(config.enableChatDialog()){
-                    client.addChatMessage(ChatMessageType.PUBLICCHAT,client.getLocalPlayer().getName(), playerDialogText, client.getLocalPlayer().getName());
-                }
+
+                final ChatMessageBuilder message = new ChatMessageBuilder()
+                        .append(Color.RED, client.getLocalPlayer().getName())
+                        .append(": ")
+                        .append(Color.BLUE, playerDialogText);
+
+                chatMessageManager.queue(QueuedMessage.builder()
+                        .type(ChatMessageType.GAMEMESSAGE)
+                        .runeLiteFormattedMessage(message.build())
+                        .build());
+
+
                 playerTextTick = client.getTickCount();
             }
         }
@@ -420,17 +446,24 @@ public class NPCOverheadDialoguePlugin extends Plugin
         }
         state.setDialog(dialogue);
         actor.setOverheadText(dialogue);
-        if(config.enableChatDialog()){
-            client.addChatMessage(ChatMessageType.PUBLICCHAT,actor.getName(), dialogue, actor.getName());
-        }
+
+        final ChatMessageBuilder message = new ChatMessageBuilder()
+                .append(Color.RED, actor.getName())
+                .append(": ")
+                .append(Color.BLUE, dialogue);
+
+        chatMessageManager.queue(QueuedMessage.builder()
+                .type(ChatMessageType.GAMEMESSAGE)
+                .runeLiteFormattedMessage(message.build())
+                .build());
     }
-    private String getWidgetTextSafely(final WidgetInfo info)
+    private String getWidgetTextSafely()
     {
-        return getWidgetTextSafely(info.getGroupId(), info.getChildId());
+        return getWidgetTextSafely(WidgetInfo.DIALOG_NPC_TEXT.getGroupId(), WidgetInfo.DIALOG_NPC_TEXT.getChildId());
     }
 
     private String getWidgetTextSafely(final int group, final int child)
     {
-        return client.getWidget(group, child) == null ? null : Text.sanitizeMultilineText(client.getWidget(group, child).getText());
+        return client.getWidget(group, child) == null ? null : Text.sanitizeMultilineText(Objects.requireNonNull(client.getWidget(group, child)).getText());
     }
 }

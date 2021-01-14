@@ -361,16 +361,17 @@ public class NPCOverheadDialoguePlugin extends Plugin
         {
             lastNPCText = npcDialogText;
             actor.setOverheadText(npcDialogText);
+            if(config.enableChatDialog()) {
+                final ChatMessageBuilder message = new ChatMessageBuilder()
+                        .append(Color.RED, actor.getName())
+                        .append(": ")
+                        .append(Color.BLUE, npcDialogText);
 
-            final ChatMessageBuilder message = new ChatMessageBuilder()
-                    .append(Color.RED, actor.getName())
-                    .append(": ")
-                    .append(Color.BLUE, npcDialogText);
-
-            chatMessageManager.queue(QueuedMessage.builder()
-                    .type(ChatMessageType.GAMEMESSAGE)
-                    .runeLiteFormattedMessage(message.build())
-                    .build());
+                chatMessageManager.queue(QueuedMessage.builder()
+                        .type(ChatMessageType.GAMEMESSAGE)
+                        .runeLiteFormattedMessage(message.build())
+                        .build());
+            }
 
             actorTextTick = client.getTickCount();
         }
@@ -383,16 +384,17 @@ public class NPCOverheadDialoguePlugin extends Plugin
             {
                 client.getLocalPlayer().setOverheadText(playerDialogText);
 
-                final ChatMessageBuilder message = new ChatMessageBuilder()
-                        .append(Color.RED, client.getLocalPlayer().getName())
-                        .append(": ")
-                        .append(Color.BLUE, playerDialogText);
+                if(config.enableChatDialog()) {
+                    final ChatMessageBuilder message = new ChatMessageBuilder()
+                            .append(Color.RED, client.getLocalPlayer().getName())
+                            .append(": ")
+                            .append(Color.BLUE, playerDialogText);
 
-                chatMessageManager.queue(QueuedMessage.builder()
-                        .type(ChatMessageType.GAMEMESSAGE)
-                        .runeLiteFormattedMessage(message.build())
-                        .build());
-
+                    chatMessageManager.queue(QueuedMessage.builder()
+                            .type(ChatMessageType.GAMEMESSAGE)
+                            .runeLiteFormattedMessage(message.build())
+                            .build());
+                }
 
                 playerTextTick = client.getTickCount();
             }
@@ -447,15 +449,17 @@ public class NPCOverheadDialoguePlugin extends Plugin
         state.setDialog(dialogue);
         actor.setOverheadText(dialogue);
 
-        final ChatMessageBuilder message = new ChatMessageBuilder()
-                .append(Color.RED, actor.getName())
-                .append(": ")
-                .append(Color.BLUE, dialogue);
+        if(config.enableChatDialog()) {
+            final ChatMessageBuilder message = new ChatMessageBuilder()
+                    .append(Color.RED, actor.getName())
+                    .append(": ")
+                    .append(Color.BLUE, dialogue);
 
-        chatMessageManager.queue(QueuedMessage.builder()
-                .type(ChatMessageType.GAMEMESSAGE)
-                .runeLiteFormattedMessage(message.build())
-                .build());
+            chatMessageManager.queue(QueuedMessage.builder()
+                    .type(ChatMessageType.GAMEMESSAGE)
+                    .runeLiteFormattedMessage(message.build())
+                    .build());
+        }
     }
     private String getWidgetTextSafely()
     {

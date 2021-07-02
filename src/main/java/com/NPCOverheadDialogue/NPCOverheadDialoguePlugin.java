@@ -23,6 +23,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.InteractingChanged;
+import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
@@ -353,8 +354,12 @@ public class NPCOverheadDialoguePlugin extends Plugin
 
     private void checkWidgetDialogs()
     {
-        final String npcDialogText = getWidgetTextSafely();
-        final String playerDialogText = getWidgetTextSafely(WidgetID.DIALOG_PLAYER_GROUP_ID, 4);
+        //final String npcDialogText = getWidgetTextSafely();
+        //final String playerDialogText = getWidgetTextSafely(WidgetID.DIALOG_PLAYER_GROUP_ID, 5);
+        Widget playerTextWidget = client.getWidget(WidgetInfo.DIALOG_PLAYER_TEXT);
+        String playerDialogText = (playerTextWidget != null) ? playerTextWidget.getText() : null;
+        Widget npcTextWidget = client.getWidget(WidgetInfo.DIALOG_NPC_TEXT);
+        String npcDialogText = (npcTextWidget != null) ? npcTextWidget.getText() : null;
 
         // For when the NPC has dialog
         if (npcDialogText != null && !lastNPCText.equals(npcDialogText))
@@ -461,13 +466,19 @@ public class NPCOverheadDialoguePlugin extends Plugin
                     .build());
         }
     }
+
+    //deprecated, old functions used for grabbing player and NPC dialog from the dialog box
+    /*
+    //for when NPCs have dialog
     private String getWidgetTextSafely()
     {
         return getWidgetTextSafely(WidgetInfo.DIALOG_NPC_TEXT.getGroupId(), WidgetInfo.DIALOG_NPC_TEXT.getChildId());
     }
 
+    //for when your player has dialog
     private String getWidgetTextSafely(final int group, final int child)
     {
         return client.getWidget(group, child) == null ? null : Text.sanitizeMultilineText(Objects.requireNonNull(client.getWidget(group, child)).getText());
     }
+     */
 }

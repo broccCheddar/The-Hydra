@@ -57,8 +57,5 @@ public interface NPCOverheadDialogueConfig extends Config
 			name = "Display Overhead Dialog in Chat",
 			description = "Displays all enabled dialog in the chat"
 	)
-	default boolean enableChatDialog()
-	{
-		return false;
-	}
+	default boolean enableChatDialog() { return false; }
 }
